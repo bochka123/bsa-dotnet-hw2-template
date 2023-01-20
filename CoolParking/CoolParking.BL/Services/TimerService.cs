@@ -14,23 +14,21 @@ public class TimerService : ITimerService
 
     private Timer _timer;
 
-    public TimerService()
-    {
-
-    }
-
     public void Dispose()
     {
-        throw new System.NotImplementedException();
+        this.Dispose();
     }
 
     public void Start()
     {
-        throw new System.NotImplementedException();
+        _timer = new Timer();
+        _timer.Interval = Interval;
+        _timer.Elapsed += Elapsed;
+        _timer.Enabled = true;
     }
 
     public void Stop()
     {
-        throw new System.NotImplementedException();
+        _timer.Stop();
     }
 }

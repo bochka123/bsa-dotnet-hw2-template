@@ -10,12 +10,12 @@ public static class Settings
     public static int Capacity { get => 10; }
     public static double PeriodOfPayment { get => 5; }
     public static double PeriodOfWritingToLog { get => 60; }
-    public static IDictionary<VehicleType, float> Tariff { get => new Dictionary<VehicleType, float>() {
+    public static IDictionary<VehicleType, decimal> Tariffs { get => new Dictionary<VehicleType, decimal>() {
             { VehicleType.PassengerCar, 2 },
             { VehicleType.Truck, 5 },
-            { VehicleType.Bus, 3.5f },
+            { VehicleType.Bus, 3.5m },
             { VehicleType.Motorcycle, 1 },
         }; 
     }
-    public static float PenaltyFactor { get => 2.5f; }
+    public static decimal PenaltyFactor { get => 2.5m; }
 }

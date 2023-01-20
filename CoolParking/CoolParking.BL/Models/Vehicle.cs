@@ -32,4 +32,21 @@ public class Vehicle
         if (!Validator.TryValidateObject(this, context, results, true))
             throw new ArgumentException();
     }
+    public static string GenerateRandomRegistrationPlateNumber()
+    {
+        var random = new Random();
+        char s1 = (char)random.Next('A', 'Z' + 1);
+        char s2 = (char)random.Next('A', 'Z' + 1);
+        int s3 = random.Next(0, 10);
+        int s4 = random.Next(0, 10);
+        int s5 = random.Next(0, 10);
+        int s6 = random.Next(0, 10);
+        char s7 = (char)random.Next('A', 'Z' + 1);
+        char s8 = (char)random.Next('A', 'Z' + 1);
+        return $"{s1}{s2}-{s3}{s4}{s5}{s6}-{s7}{s8}";
+    }
+    public override string ToString()
+    {
+        return $"{VehicleType} #{Id} with {Balance} balance";
+    }
 }

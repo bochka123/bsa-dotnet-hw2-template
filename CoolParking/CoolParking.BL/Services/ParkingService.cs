@@ -9,6 +9,8 @@ using CoolParking.BL.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System;
+using System.Timers;
+using System.Linq;
 
 namespace CoolParking.BL.Services;
 
@@ -26,19 +28,25 @@ public class ParkingService : IParkingService
         _logTimer = logTimer;
         _logService = logService;
         parking = Parking.GetInstance();
-        parking.Vehicles = new List<Vehicle>();
+        withdrawTimer.Interval = Settings.PeriodOfPayment;
+        logTimer.Interval = Settings.PeriodOfWritingToLog;
+        withdrawTimer.Elapsed += Payment;
+        logTimer.Elapsed += WriteToLog;
+        withdrawTimer.Start();
+        logTimer.Start();
+
     }
     public void AddVehicle(Vehicle vehicle)
     {
         if (parking.Vehicles.Count >= parking.Capacity)
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("There are no free places on parking");
         foreach (Vehicle vehicle1 in GetVehicles())
         {
             if (vehicle.Id == vehicle1.Id)
-                throw new ArgumentException();
+                throw new ArgumentException("There is vehicle with such Id");
         }
         if (vehicle == null)
-            throw new ArgumentNullException();
+            throw new ArgumentNullException("Exception because of null value");
         parking.Vehicles.Add(vehicle);
     }
 
@@ -46,8 +54,10 @@ public class ParkingService : IParkingService
     {
         if (!disposed)
         {
+            parking.TransactionsBeforeLog.Clear();
             parking.Balance = 0;
             parking.Vehicles.Clear();
+            parking.BalanceBeforeLog = 0;
         }
     }
     public decimal GetBalance()
@@ -67,7 +77,7 @@ public class ParkingService : IParkingService
 
     public TransactionInfo[] GetLastParkingTransactions()
     {
-        throw new NotImplementedException();
+        return parking.TransactionsBeforeLog.ToArray();
     }
 
     public ReadOnlyCollection<Vehicle> GetVehicles()
@@ -78,7 +88,10 @@ public class ParkingService : IParkingService
 
     public string ReadFromLog()
     {
-        throw new NotImplementedException();
+        var result = _logService.Read();
+        if (result == null)
+            return "Log file is empty";
+        return result;
     }
 
     public void RemoveVehicle(string vehicleId)
@@ -101,7 +114,7 @@ public class ParkingService : IParkingService
     public void TopUpVehicle(string vehicleId, decimal sum)
     {
         if (sum < 0)
-            throw new ArgumentException();
+            throw new ArgumentException("Sum is less than zero");
         Vehicle currentVehicle = null;
         foreach (Vehicle vehicle in GetVehicles())
         {
@@ -112,7 +125,46 @@ public class ParkingService : IParkingService
             }
         }
         if (currentVehicle == null)
-            throw new ArgumentException();
+            throw new ArgumentException("There is no vehicle with such Id");
         currentVehicle.Balance += sum;
+    }
+    public void Payment(object source, ElapsedEventArgs e)
+    {
+        foreach (Vehicle vehicle in GetVehicles())
+        {
+            decimal price = parking.Tarrifs[vehicle.VehicleType];
+            if (vehicle.Balance < price)
+            {
+                if (vehicle.Balance < 0)
+                {
+                    price *= parking.PenaltyFactor;
+                }
+                else
+                {
+                    decimal diff = price - vehicle.Balance;
+                    price = diff * parking.PenaltyFactor + vehicle.Balance;
+                }
+            }
+            TransactionInfo transaction = new TransactionInfo();
+            transaction.Sum = price;
+            transaction.VehicleId = vehicle.Id;
+            parking.TransactionsBeforeLog.Add(transaction);
+            vehicle.Balance -= price;
+            parking.Balance += price;
+            parking.BalanceBeforeLog += price;
+        }
+    }
+    public void WriteToLog(object source, ElapsedEventArgs e)
+    {
+        string transactions = String.Empty;
+        foreach (var transaction in parking.TransactionsBeforeLog.ToList())
+            transactions += $"{transaction}\n";
+        _logService.Write(transactions);
+        parking.TransactionsBeforeLog.Clear();
+        parking.BalanceBeforeLog = 0;
+    }
+    public decimal GetBalanceBeforeLog()
+    {
+        return parking.BalanceBeforeLog;
     }
 }
