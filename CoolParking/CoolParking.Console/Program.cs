@@ -1,12 +1,14 @@
 ﻿using CoolParking.BL.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using CoolParking.BL.Interfaces;
-using CoolParking.BL.Services;
+using CoolParking.WebAPI.Controllers;
+using Newtonsoft.Json;
 
-string _logFilePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\Transactions.log";
-ILogService logService = new LogService(_logFilePath);
-ParkingService parkingService = new ParkingService(new TimerService(), new TimerService(), logService);
+
+
+ParkingController parkingController = new ParkingController();
+VehiclesController vehiclesController = new VehiclesController();
+TransactionsController transactionsController = new TransactionsController();
 Console.WriteLine("Welcome to \"Cool Parking\"");
 Console.WriteLine("Enter \"Help\" to get info about all commands");
 while (true)
@@ -17,45 +19,37 @@ while (true)
         case "Help":
             Console.WriteLine("Enter \"Help\" to get info about all commands");
             Console.WriteLine("Enter \"Balance\" to get info about current balance");
-            Console.WriteLine("Enter \"Current\" to get info about earned money for current period");
             Console.WriteLine("Enter \"Free\" to get info about free places on parking");
-            Console.WriteLine("Enter \"HistoryBefore\" to get info about transactions for current period");
             Console.WriteLine("Enter \"History\" to get info about transactions in log");
+            Console.WriteLine("Enter \"GetLastTransaction\" to get info about transactions in log");
             Console.WriteLine("Enter \"Vehicles\" to get info about vehicles on parking");
+            Console.WriteLine("Enter \"GetById\" to get vehicle by id");
             Console.WriteLine("Enter \"Put\" to put your vehicle on our parking");
             Console.WriteLine("Enter \"Take\" to take your vehicle from our parking");
             Console.WriteLine("Enter \"TopUp\" to top up balance of your vehicle from our parking");
             Console.WriteLine("Enter \"Quit\" to quit the program");
             break;
         case "Balance":
-            Console.WriteLine(parkingService.GetBalance());
-            break;
-        case "Current":
-            Console.WriteLine(parkingService.GetBalanceBeforeLog());
+            Console.WriteLine(parkingController.GetBalance());
             break;
         case "Free":
-            Console.WriteLine($"{parkingService.GetFreePlaces()}/{parkingService.GetCapacity()}");
-            break;
-        case "HistoryBefore":
-            foreach (var transaction in parkingService.GetLastParkingTransactions())
-            {
-                Console.WriteLine(transaction.ToString());
-            }
+            Console.WriteLine($"{parkingController.GetFreePlaces()}/{parkingController.GetCapacity()}");
             break;
         case "History":
-            Console.WriteLine(parkingService.ReadFromLog());
+            Console.WriteLine(transactionsController.GetAll());
+            break;
+        case "GetLastTransaction":
+            Console.WriteLine(transactionsController.GetLast());
             break;
         case "Vehicles":
-            foreach (var car in parkingService.GetVehicles())
-            {
-                Console.WriteLine(car.ToString());
-            }
+            Console.WriteLine(vehiclesController.GetAll());
             break;
         case "Put":
             VehicleType type = VehicleType.PassengerCar;
             Console.WriteLine("Enter type of your vehicle (PassengerCar, Truck, Bus, Motorcycle)");
             bool check = true;
-            while (check) {
+            while (check)
+            {
                 string typeString = Console.ReadLine();
                 switch (typeString)
                 {
@@ -83,7 +77,8 @@ while (true)
             Console.WriteLine("Enter base balance for your vehicle");
             check = true;
             decimal balance = 0;
-            while (check) {
+            while (check)
+            {
                 try
                 {
                     balance = Convert.ToDecimal(Console.ReadLine());
@@ -96,7 +91,8 @@ while (true)
             }
             try
             {
-                parkingService.AddVehicle(new Vehicle(Vehicle.GenerateRandomRegistrationPlateNumber(), type, balance));
+                Vehicle vehicle = new Vehicle(Vehicle.GenerateRandomRegistrationPlateNumber(), type, balance);
+                vehiclesController.AddVehicle(JsonConvert.SerializeObject(vehicle));
                 Console.WriteLine("You put your vehicle on our parking successfuly");
             }
             catch (Exception ex)
@@ -104,15 +100,20 @@ while (true)
                 Console.WriteLine(ex.Message);
             }
             break;
+        case "GetById":
+            Console.WriteLine("Enter id of vehicle");
+            string id = Console.ReadLine();
+            Console.WriteLine(vehiclesController.GetById(id));
+            break;
         case "Take":
             Console.WriteLine("Enter Id of your car");
-            string id = Console.ReadLine();
+            string id1 = Console.ReadLine();
             try
             {
-                parkingService.RemoveVehicle(id);
+                vehiclesController.RemoveVehicle(id1);
                 Console.WriteLine("You removed your vehicle on our parking successfuly");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -137,7 +138,7 @@ while (true)
             }
             try
             {
-                parkingService.TopUpVehicle(vehicleId, balance1);
+                transactionsController.TopUpVehicle(vehicleId, balance1);
                 Console.WriteLine("You topped up your vehicle on our parking successfuly");
             }
             catch (Exception ex)

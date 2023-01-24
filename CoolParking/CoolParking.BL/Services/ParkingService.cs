@@ -34,7 +34,6 @@ public class ParkingService : IParkingService
         logTimer.Elapsed += WriteToLog;
         withdrawTimer.Start();
         logTimer.Start();
-
     }
     public void AddVehicle(Vehicle vehicle)
     {
@@ -54,7 +53,10 @@ public class ParkingService : IParkingService
     {
         if (!disposed)
         {
-            parking.TransactionsBeforeLog.Clear();
+            lock(parking.TransactionsBeforeLog)
+            {
+                parking.TransactionsBeforeLog.Clear();
+            }
             parking.Balance = 0;
             parking.Vehicles.Clear();
             parking.BalanceBeforeLog = 0;
@@ -74,10 +76,24 @@ public class ParkingService : IParkingService
     {
         return parking.Capacity - parking.Vehicles.Count;
     }
-
+    public Vehicle GetById(string id)
+    {
+        var vehicles = GetVehicles();
+        foreach (var vehicle in vehicles)
+        {
+            if (vehicle.Id.Equals(id))
+            {
+                return vehicle;
+            }
+        }
+        throw new ArgumentException();
+    }
     public TransactionInfo[] GetLastParkingTransactions()
     {
-        return parking.TransactionsBeforeLog.ToArray();
+        lock (parking.TransactionsBeforeLog)
+        {
+            return parking.TransactionsBeforeLog.ToArray();
+        }
     }
 
     public ReadOnlyCollection<Vehicle> GetVehicles()
@@ -148,7 +164,11 @@ public class ParkingService : IParkingService
             TransactionInfo transaction = new TransactionInfo();
             transaction.Sum = price;
             transaction.VehicleId = vehicle.Id;
-            parking.TransactionsBeforeLog.Add(transaction);
+            transaction.DateTime = DateTime.Now;
+            lock (parking.TransactionsBeforeLog)
+            {
+                parking.TransactionsBeforeLog.Add(transaction);
+            }
             vehicle.Balance -= price;
             parking.Balance += price;
             parking.BalanceBeforeLog += price;
@@ -157,10 +177,16 @@ public class ParkingService : IParkingService
     public void WriteToLog(object source, ElapsedEventArgs e)
     {
         string transactions = String.Empty;
-        foreach (var transaction in parking.TransactionsBeforeLog.ToList())
-            transactions += $"{transaction}\n";
+        lock (parking.TransactionsBeforeLog)
+        {
+            foreach (var transaction in parking.TransactionsBeforeLog.ToArray())
+                transactions += $"{transaction}\n";
+        }
         _logService.Write(transactions);
-        parking.TransactionsBeforeLog.Clear();
+        lock (parking.TransactionsBeforeLog)
+        {
+            parking.TransactionsBeforeLog.Clear();
+        }
         parking.BalanceBeforeLog = 0;
     }
     public decimal GetBalanceBeforeLog()

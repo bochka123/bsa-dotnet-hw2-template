@@ -47,6 +47,6 @@ public class Vehicle
     }
     public override string ToString()
     {
-        return $"{VehicleType} #{Id} with {Balance} balance";
+        return $"Vehicle #{Id}: {VehicleType} with {Balance} balance";
     }
 }

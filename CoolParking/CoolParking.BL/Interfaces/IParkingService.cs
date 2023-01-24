@@ -11,6 +11,7 @@ public interface IParkingService : IDisposable
     int GetFreePlaces();
     ReadOnlyCollection<Vehicle> GetVehicles();
     void AddVehicle(Vehicle vehicle);
+    Vehicle GetById(string id);
     void RemoveVehicle(string vehicleId);
     void TopUpVehicle(string vehicleId, decimal sum);
     TransactionInfo[] GetLastParkingTransactions();
