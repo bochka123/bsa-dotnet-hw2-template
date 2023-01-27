@@ -28,15 +28,15 @@ namespace CoolParking.WebAPI.Controllers
         }
         // GET: api/Vehicles
         [HttpGet]
-        public string GetAll()
+        public ActionResult<string> GetAll()
         {
             var allVehicles = _parkingService.GetVehicles();
             string results = JsonConvert.SerializeObject(allVehicles);
-            return results;
+            return Ok(results);
         }
         // GET: api/Vehicles/id
         [HttpGet("{id}")]
-        public IActionResult GetById(string id)
+        public ActionResult<string> GetById(string id)
         {
             if (!Regex.Match(id, @"[A-Z]{2}-\d{4}-[A-Z]{2}").Success)
                 return BadRequest();
@@ -53,13 +53,10 @@ namespace CoolParking.WebAPI.Controllers
         }
         // POST: api/Vehicles
         [HttpPost]
-        public IActionResult AddVehicle(string vehicleJson)
+        public ActionResult<string> AddVehicle([FromBody] Vehicle vehicle)
         {
-            if (vehicleJson == null)
+            if (vehicle == null)
                 return BadRequest();
-            #pragma warning disable CS8600
-            Vehicle vehicle = JsonConvert.DeserializeObject<Vehicle>(vehicleJson);
-            #pragma warning restore CS8600
             try
             {
                 _parkingService.AddVehicle(vehicle);
@@ -67,23 +64,23 @@ namespace CoolParking.WebAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            return StatusCode(201, JsonConvert.SerializeObject(vehicle));
+            return Created("api/Vehicles", JsonConvert.SerializeObject(vehicle));
         }
         // DELETE: api/Vehicles/id
         [HttpDelete("{id}")]
-        public IActionResult RemoveVehicle(string id)
+        public ActionResult<string> RemoveVehicle(string id)
         {
             if (!Regex.Match(id, @"[A-Z]{2}-\d{4}-[A-Z]{2}").Success)
-                return BadRequest();
+                return BadRequest("Wrong id");
             try
             {
                 _parkingService.RemoveVehicle(id);
             }
             catch (Exception)
             {
-                return NotFound();
+                return NotFound("No vehicle with such id");
             }
-            return NoContent();
+            return StatusCode(204, "You successfuly deleted your vehicle");
         }
     }
 }

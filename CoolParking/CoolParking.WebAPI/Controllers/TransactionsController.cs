@@ -4,6 +4,7 @@ using CoolParking.BL.Interfaces;
 using System.Reflection;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using CoolParking.BL.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,27 +28,28 @@ namespace CoolParking.WebAPI.Controllers
         }
         // GET: api/Transactions/Last
         [HttpGet("Last")]
-        public string GetLast()
+        public ActionResult<string> GetLast()
         {
-            return _parkingService.GetLastParkingTransactions().Last().ToString();
+            return Ok(_parkingService.GetLastParkingTransactions().Last().ToString());
         }
         // GET: api/Transactions/All
         [HttpGet("All")]
-        public string GetAll()
+        public ActionResult<string> GetAll()
         {
-            return _parkingService.ReadFromLog();
+            return Ok(_parkingService.ReadFromLog());
         }
         // PUT: api/Transactions/topUpVehicle
         [HttpPut("topUpVehicle")]
-        public IActionResult TopUpVehicle(string id, decimal sum)
+        public ActionResult<string> TopUpVehicle(string info)
         {
-            if (!Regex.Match(id, @"[A-Z]{2}-\d{4}-[A-Z]{2}").Success || sum < 0)
+            TransactionInfo transactionInfo = JsonConvert.DeserializeObject<TransactionInfo>(info);
+            if (!Regex.Match(transactionInfo.VehicleId, @"[A-Z]{2}-\d{4}-[A-Z]{2}").Success || transactionInfo.Sum < 0)
                 return BadRequest();
             string vehicle;
             try
             {
-                _parkingService.TopUpVehicle(id, sum);
-                vehicle = JsonConvert.SerializeObject(_parkingService.GetById(id));
+                _parkingService.TopUpVehicle(transactionInfo.VehicleId, transactionInfo.Sum);
+                vehicle = JsonConvert.SerializeObject(_parkingService.GetById(transactionInfo.VehicleId));
             }
             catch (Exception)
             {

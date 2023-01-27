@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoolParking.BL", "CoolParki
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoolParking.BL.Tests", "CoolParking.BL.Tests\CoolParking.BL.Tests.csproj", "{0DBA95BF-14F2-4E07-9784-168BC5BC515A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoolParking.Console", "CoolParking.Console\CoolParking.Console.csproj", "{5B57BF3A-A133-4D65-AD15-A851B16DADFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoolParking.WebAPI", "CoolParking.WebAPI\CoolParking.WebAPI.csproj", "{6715B5CE-518E-48C7-AB04-09EA691E33B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolParking.WebAPI", "CoolParking.WebAPI\CoolParking.WebAPI.csproj", "{6715B5CE-518E-48C7-AB04-09EA691E33B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolParking.Presentation", "CoolParking.Presentation\CoolParking.Presentation.csproj", "{C39E13C5-26D3-4518-9E45-CCE5D3CCF455}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,14 +25,14 @@ Global
 		{0DBA95BF-14F2-4E07-9784-168BC5BC515A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DBA95BF-14F2-4E07-9784-168BC5BC515A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DBA95BF-14F2-4E07-9784-168BC5BC515A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B57BF3A-A133-4D65-AD15-A851B16DADFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B57BF3A-A133-4D65-AD15-A851B16DADFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B57BF3A-A133-4D65-AD15-A851B16DADFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B57BF3A-A133-4D65-AD15-A851B16DADFB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6715B5CE-518E-48C7-AB04-09EA691E33B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6715B5CE-518E-48C7-AB04-09EA691E33B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6715B5CE-518E-48C7-AB04-09EA691E33B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6715B5CE-518E-48C7-AB04-09EA691E33B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C39E13C5-26D3-4518-9E45-CCE5D3CCF455}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C39E13C5-26D3-4518-9E45-CCE5D3CCF455}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C39E13C5-26D3-4518-9E45-CCE5D3CCF455}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C39E13C5-26D3-4518-9E45-CCE5D3CCF455}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
